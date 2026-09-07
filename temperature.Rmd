@@ -1,0 +1,285 @@
+---
+title: "temperature"
+output: html_document
+---
+
+##############################################
+
+# 2.3 Temperature data
+
+##############################################
+
+# Import temperature data from HOBO loggers
+
+# Setup ------------------------------------------------------------------------
+
+```{r}
+colnames_temperature <- c("datapoint_nr","date_time","temperature_C","logger_id","logger_nr")
+
+source("figure_formats_and_colour_palette.R")
+
+```
+
+# DATA IMPORT
+
+Description: In the HOBOware pro, settings to data export set to export file type == .xlsx, include line number column, include plot title in header, no quotes or commas in headings..., date format == YMD, date separator == dash, time format == 24-hour. Time zone is GMT +2
+
+The excel files are manually edited: make a new column with the plot title as logger id, and a new column with logger number. Delete first row.
+
+```{r Import excel files}
+# 2023 -------------------------------------------------------------------------
+t1 <- readxl::read_excel(path = here("data","source_data","temperature","Barsetvatn_2023_bl_21508213.xlsx"))
+colnames(t1) <- colnames_temperature
+t1 <- t1 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+  
+t2 <- readxl::read_excel(path = here("data","source_data","temperature","Barsetvatn_2023_str_21140198.xlsx"))
+colnames(t2) <- colnames_temperature
+t2 <- t2 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t3 <- readxl::read_excel(path = here("data","source_data","temperature","Gjoljavatn_2023_bl_21508207.xlsx"))
+colnames(t3) <- colnames_temperature
+t3 <- t3 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t4 <- readxl::read_excel(path = here("data","source_data","temperature","Gjoljavatn_2023_str_21140205.xlsx"))
+colnames(t4) <- colnames_temperature
+t4 <- t4 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t5 <- readxl::read_excel(path = here("data","source_data","temperature","Kilvatn_2023_bl_21620476.xlsx"))
+colnames(t5) <- colnames_temperature
+t5 <- t5 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t6 <- readxl::read_excel(path = here("data","source_data","temperature","Kilvatn_2023_str_21140206.xlsx"))
+colnames(t6) <- colnames_temperature
+t6 <- t6 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t7 <- readxl::read_excel(path = here("data","source_data","temperature","Roksetvatn_2023_str_21508212.xlsx"))
+colnames(t7) <- colnames_temperature
+t7 <- t7 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t8 <- readxl::read_excel(path = here("data","source_data","temperature","Stordrakstsj_2023_str_21102653.xlsx"))
+colnames(t8) <- colnames_temperature
+t8 <- t8 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t9 <- readxl::read_excel(path = here("data","source_data","temperature","Storvatn_2023_bl_21508214.xlsx"))
+colnames(t9) <- colnames_temperature
+t9 <- t9 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t10 <- readxl::read_excel(path = here("data","source_data","temperature","Storvatn_2023_str_21140212.xlsx"))
+colnames(t10) <- colnames_temperature
+t10 <- t10 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+
+# 2024 -------------------------------------------------------------------------
+
+t11 <- readxl::read_excel(path = here("data","source_data","temperature","Barsetvatnet_2024_bl_21774703.xlsx"))
+colnames(t11) <- colnames_temperature
+t11 <- t11 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t12 <- readxl::read_excel(path = here("data","source_data","temperature","Barsetvatnet_2024_str_21774702.xlsx"))
+colnames(t12) <- colnames_temperature
+t12 <- t12 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t13 <- readxl::read_excel(path = here("data","source_data","temperature","Gjoljavatnet_2024_bl_21774713.xlsx"))
+colnames(t13) <- colnames_temperature
+t13 <- t13 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t14 <- readxl::read_excel(path = here("data","source_data","temperature","Gjoljavatnet_2024_str_21798976.xlsx"))
+colnames(t14) <- colnames_temperature
+t14 <- t14 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t15 <- readxl::read_excel(path = here("data","source_data","temperature","Kilvatn_2024_str_21774708.xlsx"))
+colnames(t15) <- colnames_temperature
+t15 <- t15 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t16 <- readxl::read_excel(path = here("data","source_data","temperature","Roksetvatn_2024_bl_21798966.xlsx"))
+colnames(t16) <- colnames_temperature
+t16 <- t16 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t17 <- readxl::read_excel(path = here("data","source_data","temperature","Roksetvatn_2024_str_21798975.xlsx"))
+colnames(t17) <- colnames_temperature
+t17 <- t17 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t18 <- readxl::read_excel(path = here("data","source_data","temperature","Stordrakstsj_2024_bl_21774707.xlsx"))
+colnames(t18) <- colnames_temperature
+t18 <- t18 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t19 <- readxl::read_excel(path = here("data","source_data","temperature","Stordrakstsj_2024_str_21774696.xlsx"))
+colnames(t19) <- colnames_temperature
+t19 <- t19 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t20 <- readxl::read_excel(path = here("data","source_data","temperature","Storvatn_2024_bl_21774695.xlsx"))
+colnames(t20) <- colnames_temperature
+t20 <- t20 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+t21 <- readxl::read_excel(path = here("data","source_data","temperature","Storvatnet_2024_str_21774704.xlsx"))
+colnames(t21) <- colnames_temperature
+t21 <- t21 %>%
+  mutate(logger_id = logger_id[1],
+         logger_nr = logger_nr[1])
+
+
+# Merge dataframes ----
+temperature_data <- rbind(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21)
+
+# Check datetime format
+# temperature_data <- temperature_data %>%
+#  as.POSIXct(date_time, format = "%Y.%m.%d %H:%M:%S")
+
+# Save file
+save(temperature_data, file = here::here("data","source_data","temperature","temperature_data.rda"))
+
+```
+
+
+
+# Add logger info --------------------------------------------------------------
+```{r Load logger info}
+# Import excel sheet with logging period info
+logger_info <- readxl::read_excel(path = here("data","source_data","temperature","HOBO_loggers_overview.xlsx"),
+                                  sheet = "logger_info") # relevant columns: date_time_start and date_time_stop
+
+
+# Each logger was placed in either 1) water column with a buoy (ca. 1-1.5m depth), or 2) littoral zone (ca. 0.5-1.0m depth)
+logger_info <- logger_info %>% mutate(logger_placement = case_when(
+  str_detect(logger_id, "_str") ~ "Littoral zone",
+  str_detect(logger_id, "_bl") ~ "Buoy",
+  .default = NA
+))
+
+```
+
+
+```{r Keep only valid logging period (v2)}
+
+# Filter the start and stop datetimes: for each logger, keep only datapoints within the date_time_start and date_time_stop interval
+
+# Add start and stop 
+temperature_data_v2 <- left_join(
+  x = temperature_data, 
+  y = dplyr::select(logger_info, c("locality","date_time_start","date_time_stop","logger_id", "logger_placement")),
+  by = "logger_id")
+
+
+# Filter datapoints, go from 16227 to 12918 observations
+temperature_data_v2 <- temperature_data_v2 %>%
+  subset(date_time >= date_time_start & date_time <= date_time_stop)
+
+# Remove Kilvatnet Buoy 2023 as this was dragged under, and not at the same depth as the others (go from 12918 to 12037 observations)
+temperature_data_v2 <- temperature_data_v2 %>% filter(logger_id != "Kilvatn_2023_bl_21620476")
+
+
+# Set factors
+temperature_data_v2$locality <- factor(temperature_data_v2$locality, 
+                                       levels = c("Barsetvatnet","Roksetvatnet","Kilvatnet",
+                                                  "Gjoljavatnet","Storvatnet","Stor-Drakstsjoen"))
+temperature_data_v2$logger_placement <- as.factor(temperature_data_v2$logger_placement)
+
+```
+
+
+# Add daily mean temp. ---------------------------------------------------------
+```{r}
+# Add date as separate column
+temperature_data_v2 <- temperature_data_v2 %>%
+  mutate(eventDate = as.Date(date_time), .after = date_time,
+         year = as.numeric(format(date_time, "%Y")),
+         month = as.numeric(format(date_time, "%m")),
+         day = as.numeric(format(date_time, "%d")),
+         month_day = paste(strftime(date_time, format = "%m-%d"),sep="-")) 
+
+# Set factor
+temperature_data_v2$year <- as.factor(temperature_data_v2$year)
+
+# Save
+save(temperature_data_v2, file = here::here("data","derived_data","temperature","temperature_data_v2.rda"))
+
+
+# Add regulation status
+temperature_data_v2 <- temperature_data_v2 %>%
+  mutate(Status = case_when(locality %in% c("Barsetvatnet","Kilvatnet","Roksetvatnet") ~ "Control", 
+                            locality %in% c("Gjoljavatnet","Stor-Drakstsjoen","Storvatnet") ~ "Regulated"))
+temperature_data_v2$Status <- as.factor(temperature_data_v2$Status)
+
+           
+# Average daily temperature
+temperature_data_avg <- temperature_data_v2 %>%
+  group_by(Status, locality, logger_placement, year, eventDate, logger_id) %>% summarise(
+    daily_avg_temp = round(mean(temperature_C, ),digits = 3),
+    daily_avg_temp_sd = round(sd(temperature_C),digits = 3))
+
+```
+
+
+# Plot temperature -------------------------------------------------------------
+
+```{r}
+
+temperature_data_avg$shape_group <- lake_shapegroup(temperature_data_avg$locality)
+
+p_temperature <- ggplot(temperature_data_avg,
+                          aes(x = as.Date(paste(2025, strftime(eventDate, "%m-%d"), sep = "-")),
+                              y = daily_avg_temp,
+                              color = Status,
+                              shape = shape_group,
+                              alpha = 0.8)) +
+  facet_grid(rows = vars(logger_placement), cols = vars(year)) +
+  geom_point(size = 1.5) +
+  geom_line() +
+  scale_color_manual(values = status_colours) +
+  scale_shape_manual(name = "Lake", values = lake_shapegroup_symbols) +
+  scale_x_date(breaks = month_breaks, labels = month_labels_3L) +
+  ylim(0,NA) +
+  labs(x = "Time of year", y = "Water temperature (\u00B0C)") +
+  guides(alpha = "none") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.box="vertical", panel.grid = element_blank())
+
+p_temperature
+
+for (figformat in preferred_formats){
+  ggsave(paste("figures/temperature/all_temperatures.", figformat, sep = ""), plot = p_temperature, height = col_width_sng, width = col_width_sng, units = "cm")
+}
+
+
+```
+

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="MapSource 6.15.11" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+
+  <metadata>
+    <link href="http://www.garmin.com">
+      <text>Garmin International</text>
+    </link>
+    <time>2023-05-26T10:52:47Z</time>
+    <bounds maxlat="63.7978781" maxlon="10.8024713" minlat="63.2862061" minlon="9.8271017"/>
+  </metadata>
+
+  <wpt lat="63.7978781" lon="9.8271017">
+    <ele>2562.0197754</ele>
+    <name>203</name>
+    <cmt>05-MAI-23 6:10:56PM</cmt>
+    <desc>05-MAI-23 6:10:56PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.7977855" lon="9.8281853">
+    <ele>2561.7795410</ele>
+    <name>204</name>
+    <cmt>05-MAI-23 6:25:18PM</cmt>
+    <desc>05-MAI-23 6:25:18PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.7902377" lon="10.0243659">
+    <ele>2562.2602539</ele>
+    <name>205</name>
+    <cmt>07-MAI-23 10:42:56AM</cmt>
+    <desc>07-MAI-23 10:42:56AM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.7901434" lon="10.0257491">
+    <ele>2561.7795410</ele>
+    <name>206</name>
+    <cmt>07-MAI-23 10:51:21AM</cmt>
+    <desc>07-MAI-23 10:51:21AM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.7903192" lon="10.0254841">
+    <ele>2562.0197754</ele>
+    <name>207</name>
+    <cmt>07-MAI-23 10:54:35AM</cmt>
+    <desc>07-MAI-23 10:54:35AM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.7889659" lon="10.0245242">
+    <ele>2564.4230957</ele>
+    <name>208</name>
+    <cmt>07-MAI-23 12:26:07PM</cmt>
+    <desc>07-MAI-23 12:26:07PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.6219067" lon="10.2324835">
+    <ele>2561.2988281</ele>
+    <name>209</name>
+    <cmt>07-MAI-23 3:07:32PM</cmt>
+    <desc>07-MAI-23 3:07:32PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.6211776" lon="10.2333759">
+    <ele>2562.5004883</ele>
+    <name>210</name>
+    <cmt>07-MAI-23 4:56:12PM</cmt>
+    <desc>07-MAI-23 4:56:12PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.6540242" lon="10.0664314">
+    <ele>2561.5393066</ele>
+    <name>211</name>
+    <cmt>07-MAI-23 6:18:24PM</cmt>
+    <desc>07-MAI-23 6:18:24PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.3449943" lon="10.5523640">
+    <ele>2561.2988281</ele>
+    <name>212</name>
+    <cmt>11-MAI-23 11:35:15AM</cmt>
+    <desc>11-MAI-23 11:35:15AM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.3447909" lon="10.5500174">
+    <ele>2562.0197754</ele>
+    <name>213</name>
+    <cmt>11-MAI-23 12:29:35PM</cmt>
+    <desc>11-MAI-23 12:29:35PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.2862061" lon="10.8023635">
+    <ele>2561.2988281</ele>
+    <name>214</name>
+    <cmt>11-MAI-23 4:01:43PM</cmt>
+    <desc>11-MAI-23 4:01:43PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.7892609" lon="10.0251734">
+    <ele>2564.1828613</ele>
+    <name>215</name>
+    <cmt>22-MAI-23 3:52:31PM</cmt>
+    <desc>22-MAI-23 3:52:31PM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+  <wpt lat="63.2864611" lon="10.8024713">
+    <ele>2562.7407227</ele>
+    <name>216</name>
+    <cmt>24-MAI-23 10:58:13AM</cmt>
+    <desc>24-MAI-23 10:58:13AM</desc>
+    <sym>Fishing Hot Spot Facility</sym>
+    <extensions>
+      <gpxx:WaypointExtension xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+        <gpxx:DisplayMode>SymbolAndName</gpxx:DisplayMode>
+      </gpxx:WaypointExtension>
+    </extensions>
+  </wpt>
+
+</gpx>

@@ -1,0 +1,344 @@
+---
+title: "waterlevel"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggpubr)
+library(scales)
+library(dplyr)
+
+source("figure_formats_and_colour_palette.R")
+
+```
+
+
+
+# Load data from public hydropower records
+
+All data have been downloaded with 1 point per 24 hours for entire time series. Dates without a water level measure has a water level equal to `NA`.
+
+```{r Function for data cleaning}
+clean_waterlevel_data <- function(wl_df, outliers.rm = FALSE, remove.after = NA){
+  # Keep columns with time and water level
+  wl_df <- transmute(wl_df, Timepoint = as.Date(Tidspunkt), Waterlevel_m = Vannstand..m.)
+  
+  if (outliers.rm){
+    # Remove outliers (z_score above |3|)
+    wl_df$z_score <- (wl_df$Waterlevel_m-mean(wl_df$Waterlevel_m, na.rm = TRUE))/sd(wl_df$Waterlevel_m, na.rm = TRUE)
+    wl_df$Waterlevel_m <- case_when(
+      wl_df$z_score >  3 ~ NA,
+      wl_df$z_score < -3 ~ NA,
+      .default = wl_df$Waterlevel_m
+    )
+  }
+  
+  # Calculate daily change 
+  wl_df$Change_WL_m_per_d <- c(NA, diff(wl_df$Waterlevel_m))
+  
+  # Calculate weekly change 
+  wl_df$Change_WL_m_per_w <- c(rep(NA,7), diff(wl_df$Waterlevel_m, lag = 7))
+
+  
+  # Include year and julian date as separate columns
+  wl_df <- mutate(wl_df, Year = as.integer(format(Timepoint,'%Y')), Day_of_year = as.integer(format(Timepoint,'%j')))
+  
+  # Remove years that is after a certain point (i.e. data from after our field sampling period)
+  if (!is.na(remove.after)){
+    if (is.numeric(remove.after)){
+      wl_df <- filter(wl_df, Year <= remove.after)
+    }else{
+      warning("Argument remove.after should be either NA or numeric.")
+    }
+  } # Else, keep all years
+  
+  return(wl_df)
+}
+
+```
+
+```{r Load data for our hydropower-regulated lakes}
+
+gjolja_wl <- read.csv2("data/sildredata/Gjolja_134.1.0-Vannstand-dogn-v1.csv", skip = 1) %>% clean_waterlevel_data(outliers.rm = T, remove.after = 2024)
+drakst_wl <- read.csv2("data/sildredata/Drakstsjo_123.19.0-Vannstand-dogn-v0.csv", skip = 1) %>% clean_waterlevel_data(outliers.rm = T, remove.after = 2024)
+
+```
+
+
+
+```{r Function for yearly summaries of water level data}
+
+WL_summary <- function(wl_df){
+  wl_df %>% summarize(
+    info_days = sum(!(is.na(Waterlevel_m))),
+    WL_max = max(Waterlevel_m, na.rm = TRUE), 
+    WL_min = min(Waterlevel_m, na.rm = TRUE), 
+    Ampl = WL_max - WL_min, 
+    Inc_d_max = max(Change_WL_m_per_d, na.rm = TRUE), 
+    Dec_d_max = min(Change_WL_m_per_d, na.rm = TRUE),
+    Inc_w_max = max(Change_WL_m_per_w, na.rm = TRUE), 
+    Dec_w_max = min(Change_WL_m_per_w, na.rm = TRUE),
+    Avg_fluct_d_abs = mean(abs(Change_WL_m_per_d), na.rm = TRUE)
+    ) 
+}
+
+
+```
+
+
+```{r Yearly overviews HP}
+
+# Gjøljavatnet
+gjolja_yearly_summary <- gjolja_wl %>% 
+  group_by(Year) %>%
+  WL_summary() %>%
+  filter(if_all(where(is.numeric), is.finite))
+
+gjolja_yearly_summary
+colMeans(gjolja_yearly_summary)
+
+gjolja_yearly_summary_fullyears <- gjolja_yearly_summary %>% filter(info_days >= 365)
+gjolja_yearly_summary_fullyears
+colMeans(gjolja_yearly_summary_fullyears)
+
+gjolja_fullyears <- gjolja_yearly_summary_fullyears$Year %>% unique()
+
+
+# Stor-Drakstsjøen
+drakst_yearly_summary <- drakst_wl %>% 
+  group_by(Year) %>%
+  WL_summary() %>%
+  filter(if_all(where(is.numeric), is.finite))
+
+drakst_yearly_summary
+colMeans(drakst_yearly_summary)
+
+drakst_yearly_summary_fullyears <- drakst_yearly_summary %>% filter(info_days >= 365)
+drakst_yearly_summary_fullyears
+colMeans(drakst_yearly_summary_fullyears)
+
+drakst_fullyears <- drakst_yearly_summary_fullyears$Year %>% unique()
+
+
+```
+
+```{r Amplitude across years}
+
+gjolja_plot_amp <- ggplot(gjolja_yearly_summary_fullyears, aes(y = Ampl, x = Year, alpha = 0.3)) + 
+  geom_point() + 
+  labs(x = "Year",
+       y = "Yearly amplitude (m)") +
+  theme(legend.position = "none")
+
+gjolja_plot_amp
+
+drakst_plot_amp <- ggplot(drakst_yearly_summary_fullyears, aes(y = Ampl, x = Year, alpha = 0.3)) + 
+  geom_point() +
+  labs(x = "Year",
+       y = "Yearly amplitude (m)") +
+  theme(legend.position = "none")
+
+drakst_plot_amp
+
+
+```
+
+# Make plots for Gjøljavatnet and Stor-Drakstsjøen
+
+``` {r Plots for paper Gjøljavatnet and Stor-Drakstsjøen}
+
+gjolja_station_masl <- 51.4
+
+gjolja_max_y <- filter(gjolja_wl, Day_of_year < 366, Year %in% tail(sort(gjolja_fullyears), 10))$Waterlevel_m %>% ceiling() %>% max()
+gjolja_min_y <- filter(gjolja_wl, Day_of_year < 366, Year %in% tail(sort(gjolja_fullyears), 10))$Waterlevel_m %>% min() %>% min(gjolja_max_y-6)
+
+gjolja_plot <-  ggplot(filter(gjolja_wl, Day_of_year < 366, Year %in% tail(sort(gjolja_fullyears), 10)),
+                       aes(x = as.Date(Day_of_year, origin = "2025-01-01"), y = Waterlevel_m+gjolja_station_masl)) +
+  geom_line(aes(color = Year, group = Year),
+    linewidth = 0.5,
+  ) +  labs(x = "Time of year",
+       y = "Water level (m.a.s.l.)") +
+  scale_color_gradient(name = "Year", low = paste(status_colours[["Regulated"]],"30", sep=""), high = paste(status_colours[["Regulated"]],"ff", sep="")) +
+   geom_hline(yintercept = gjolja_station_masl, color = "black", linetype = "dashed")+
+  scale_x_date(breaks = month_breaks, labels = month_labels_1L, expand = c(0, 0))+
+  scale_y_continuous(breaks = seq(floor(gjolja_min_y+gjolja_station_masl), gjolja_max_y+gjolja_station_masl, by = 1))+
+  coord_cartesian(xlim = as.Date(c("2025-01-01","2025-12-31")),
+                  ylim = c(gjolja_min_y+gjolja_station_masl, gjolja_max_y+gjolja_station_masl))+
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+    legend.position = "inside",
+    legend.position.inside = c(1, 0),        # Coordinate coordinates (X=1 is right, Y=0 is bottom)
+    legend.justification = c("right", "bottom"), # Anchors the bottom-right corner of the legend box
+    legend.box.background = element_rect(color = "black"),
+    legend.direction = "horizontal"        
+  )
+
+gjolja_plot
+
+
+drakst_max_y <- filter(drakst_wl, Day_of_year < 366, Year %in% tail(sort(drakst_fullyears), 10))$Waterlevel_m %>% ceiling() %>% max()
+drakst_min_y <- filter(drakst_wl, Day_of_year < 366, Year %in% tail(sort(drakst_fullyears), 10))$Waterlevel_m %>% min() %>% min(drakst_max_y-6)
+drakst_plot <- ggplot(filter(drakst_wl, Day_of_year < 366, Year %in% tail(sort(drakst_fullyears), 10)),
+                       aes(x = as.Date(Day_of_year, origin = "2025-01-01"), y = Waterlevel_m)) +
+  geom_line(aes(color = Year, group = Year),
+    linewidth = 0.5,
+  ) +  labs(x = "Time of year",
+       y = "Water level (m.a.s.l.)") +
+  scale_color_gradient(name = "Year", low = paste(status_colours[["Regulated"]],"30", sep=""), high = paste(status_colours[["Regulated"]],"ff", sep="")) +
+   geom_hline(yintercept = 265.6, color = "black", linetype = "dashed")+
+  scale_x_date(breaks = month_breaks, labels = month_labels_1L, expand = c(0, 0))+
+  scale_y_continuous(breaks = seq(floor(drakst_max_y-5), drakst_max_y, by = 1))+
+  coord_cartesian(
+    xlim = as.Date(c("2025-01-01","2025-12-31")),
+    ylim = c(drakst_min_y, drakst_max_y)
+    )+
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+    legend.position = "inside",
+    legend.position.inside = c(1, 0),        # Coordinate coordinates (X=1 is right, Y=0 is bottom)
+    legend.justification = c("right", "bottom"), # Anchors the bottom-right corner of the legend box
+    legend.box.background = element_rect(color = "black"),
+    legend.direction = "horizontal"        
+  )
+
+drakst_plot
+
+
+for (figformat in preferred_formats){
+  # NOTE! For some reason "less or equal to" sympbol is displayed as = in pdf (svg and png OK)
+  ggsave(paste("figures/waterlevel/gjolja_wl_plot.", figformat, sep = ""), plot = gjolja_plot, height = 6.5, width = col_width_dbl, units = "cm")
+  ggsave(paste("figures/waterlevel/drakst_wl_plot.", figformat, sep = ""), , plot = drakst_plot, height = 6.5, width = col_width_dbl, units = "cm")
+}
+  
+
+```
+
+
+# Load water level measured at sampling events
+
+```{r Our water-level data (NON-HP)}
+
+# Water level data unregulated lakes
+GPS_waterlevels <- readxl::read_excel(path = here("data","source_data","waterlevels","GPS_waterlevels.xlsx"),
+                         sheet = "Data")
+
+# Save file
+save(GPS_waterlevels, file = here::here("data","source_data","waterlevels","GPS_waterlevels.rda"))
+
+
+# Make year a factor
+GPS_waterlevels$year <- as.factor(GPS_waterlevels$year)
+
+```
+
+
+# Make plots for control lakes
+
+```{r Plots for paper: Ba Ro Ki}
+GPS_waterlevels$shape_group <- lake_shapegroup(GPS_waterlevels$locality)
+
+# Barsetvatnet
+barset_max_y <- ceiling(max(filter(GPS_waterlevels, locality == "Barsetvatnet")$waterlevel_masl))
+barset_p <- ggplot(subset(GPS_waterlevels, locality == "Barsetvatnet"))+ 
+  geom_point(aes(x=as.Date(paste(2025,strftime(eventDate, format = "%m-%d"),sep = "-")),
+                 y = waterlevel_masl, 
+                 alpha = year), 
+              shape = lake_shapegroup_symbols[[lake_shapegroup("Barsetvatnet")]],
+              color = status_colours[["Control"]],
+             size=2)+
+  geom_line(aes(x=as.Date(paste(2025,strftime(eventDate, format = "%m-%d"),sep = "-")),
+                y = waterlevel_masl,
+                alpha = year, 
+                group = year),
+                color = status_colours[["Control"]]
+            )+
+  scale_alpha_manual(name = "Year", values = c("2023" = 0.7, "2024" = 1)) +
+  scale_x_date(breaks = month_breaks, labels = month_labels_1L, expand = c(0, 0))+
+  scale_y_continuous(breaks = seq(floor(barset_max_y-5), barset_max_y, by = 1))+
+  coord_cartesian(
+    xlim = as.Date(c("2025-01-01","2025-12-31")), 
+    ylim = c(barset_max_y-6,barset_max_y)) +
+  geom_hline(yintercept = 61.2, color = "black", linetype = "dashed")+
+  labs(x = "Time of year", y = "Water level (m.a.s.l.)")+
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+    legend.position = "inside",
+    legend.position.inside = c(1, 0),        # Coordinate coordinates (X=1 is right, Y=0 is bottom)
+    legend.justification = c("right", "bottom"), # Anchors the bottom-right corner of the legend box
+    legend.box.background = element_rect(color = "black")
+  )
+
+# Roksetvatnet
+rokset_max_y <- ceiling(max(filter(GPS_waterlevels, locality == "Roksetvatnet")$waterlevel_masl))
+rokset_p <- ggplot(subset(GPS_waterlevels, locality == "Roksetvatnet")) +
+  geom_point(aes(x=as.Date(paste(2025,strftime(eventDate, format = "%m-%d"),sep = "-")),
+                 y = waterlevel_masl, 
+                 alpha = year), 
+             shape = lake_shapegroup_symbols[[lake_shapegroup("Roksetvatnet")]],
+             color = status_colours[["Control"]],
+             size=2)+
+  geom_line(aes(x=as.Date(paste(2025,strftime(eventDate, format = "%m-%d"),sep = "-")),
+                y = waterlevel_masl,
+                alpha = year, 
+                group = year),
+            color = status_colours[["Control"]]
+            )+
+    scale_alpha_manual(name = "Year", values = c("2023" = 0.7, "2024" = 1)) +
+  scale_x_date(breaks = month_breaks, labels = month_labels_1L, expand = c(0, 0))+
+  scale_y_continuous(breaks = seq(floor(rokset_max_y-5), rokset_max_y, by = 1))+
+  coord_cartesian(
+    xlim = as.Date(c("2025-01-01","2025-12-31")), 
+    ylim = c(rokset_max_y-6,rokset_max_y)) +
+  geom_hline(yintercept = 192.4, color = "black", linetype = "dashed")+
+  labs(x = "Time of year", y = "Water level (m.a.s.l.)")+
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+    legend.position = "inside",
+    legend.position.inside = c(1, 0),        # Coordinate coordinates (X=1 is right, Y=0 is bottom)
+    legend.justification = c("right", "bottom"), # Anchors the bottom-right corner of the legend box
+    legend.box.background = element_rect(color = "black")
+  )
+
+# Jonsvatnet
+kil_max_y <- ceiling(max(filter(GPS_waterlevels, locality == "Kilvatnet")$waterlevel_masl))
+kil_p <- ggplot(subset(GPS_waterlevels, locality == "Kilvatnet"))+
+  geom_point(aes(x=as.Date(paste(2025,strftime(eventDate, format = "%m-%d"),sep = "-")),
+                 y = waterlevel_masl, 
+                 alpha = year), 
+            shape = lake_shapegroup_symbols[[lake_shapegroup("Kilvatnet")]],
+            color = status_colours[["Control"]],
+             size=2)+
+  geom_line(aes(x=as.Date(paste(2025,strftime(eventDate, format = "%m-%d"),sep = "-")),
+                y = waterlevel_masl,
+                alpha = year, 
+                group = year),
+            color = status_colours[["Control"]]
+            )+
+    scale_alpha_manual(name = "Year", values = c("2023" = 0.7, "2024" = 1)) +
+  scale_x_date(breaks = month_breaks, labels = month_labels_1L, expand = c(0, 0))+
+  scale_y_continuous(breaks = seq(floor(kil_max_y-5), kil_max_y, by = 1))+
+  coord_cartesian(
+    xlim = as.Date(c("2025-01-01","2025-12-31")), 
+    ylim = c(kil_max_y-6,kil_max_y)) +
+  geom_hline(yintercept = 149.3, color = "black", linetype = "dashed")+
+  labs(x = "Time of year", y = "Water level (m.a.s.l.)", shape = "Year")+
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+    legend.position = "inside",
+    legend.position.inside = c(1, 0),        # Coordinate coordinates (X=1 is right, Y=0 is bottom)
+    legend.justification = c("right", "bottom"), # Anchors the bottom-right corner of the legend box
+    legend.box.background = element_rect(color = "black")
+  )
+
+
+barset_p
+rokset_p
+kil_p
+
+for (figformat in preferred_formats){
+  ggsave(paste("figures/waterlevel/barset_wl_plot.", figformat, sep = ""), plot = barset_p, height = 6.5, width = col_width_dbl, units = "cm")
+  ggsave(paste("figures/waterlevel/rokset_wl_plot.", figformat, sep = ""), , plot = rokset_p, height = 6.5, width = col_width_dbl, units = "cm")
+  ggsave(paste("figures/waterlevel/kil_wl_plot.", figformat, sep = ""), , plot = kil_p, height = 6.5, width = col_width_dbl, units = "cm")
+}
+```
+
