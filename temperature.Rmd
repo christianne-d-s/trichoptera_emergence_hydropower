@@ -161,10 +161,6 @@ t21 <- t21 %>%
 # Merge dataframes ----
 temperature_data <- rbind(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21)
 
-# Check datetime format
-# temperature_data <- temperature_data %>%
-#  as.POSIXct(date_time, format = "%Y.%m.%d %H:%M:%S")
-
 # Save file
 save(temperature_data, file = here::here("data","source_data","temperature","temperature_data.rda"))
 
@@ -229,9 +225,6 @@ temperature_data_v2 <- temperature_data_v2 %>%
 
 # Set factor
 temperature_data_v2$year <- as.factor(temperature_data_v2$year)
-
-# Save
-save(temperature_data_v2, file = here::here("data","derived_data","temperature","temperature_data_v2.rda"))
 
 
 # Add regulation status

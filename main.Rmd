@@ -4,7 +4,6 @@ author: "Christianne Dalsbotten Solvåg"
 output: html_document
 ---
 
-
 # SET-UP ------------
 
 ```{r Settings}
@@ -19,9 +18,7 @@ settings = list(
 # Load colour palette and preferred figure format
 source("figure_formats_and_colour_palette.R")
 
-
 ```
-
 
 ```{r Update R}
 if (settings$update_R_now){
@@ -100,7 +97,6 @@ taxonlist_trich_df <- filter(taxonlist_df, order == "Trichoptera")
 
 ```
 
-
 ```{r Lake types (function)}
 
 # Lake names
@@ -115,7 +111,6 @@ lake_status <- function(lake_name){
 
 
 ```
-
 
 ```{r Load data from kick samples (larvae)}
 
@@ -183,7 +178,7 @@ kicksample_occurrences_df <- kicksample_occurrences_df %>%
 
 # Make locality a factor and set level order 
 kicksample_occurrences_df$locality <- factor(kicksample_occurrences_df$locality, 
-                                  levels = c("Barsetvatnet","Kilvatnet","Roksetvatnet","Gjoljavatnet","Stor-Drakstsjoen","Storvatnet"))
+                                  levels =  c("Barsetvatnet","Kilvatnet","Roksetvatnet","Gjoljavatnet","Stor-Drakstsjoen","Storvatnet"))
 
 # Make year a factor and set level order
 kicksample_occurrences_df$year <- factor(kicksample_occurrences_df$year, 
@@ -258,7 +253,6 @@ malaise_occurrences_df$year <- factor(malaise_occurrences_df$year,
 
 ```
 
-
 ```{r Remove data on micro-caddisfly (if true)}
 
 if (settings$remove_microtrichoptera){
@@ -273,11 +267,10 @@ if (settings$remove_microtrichoptera){
 
 ```
 
-
-
 # DATA OVERVIEW ----------------
 
-## SPECIES LIST ----
+## Species lists
+
 ```{r Species list}
 
 all_observations_species <- bind_rows(kicksample_trich_occurrences_speciesonly_df, malaise_occurrences_df)
@@ -288,8 +281,8 @@ unique(specieslist_long$scientificName)
 specieslist_wide_ctr <- spread(filter(specieslist_long, Status == "Control"), samplingProtocol, n)
 specieslist_wide_reg <- spread(filter(specieslist_long, Status == "Regulated"), samplingProtocol, n)
 
-specieslist_by_status_x_method <- full_join(specieslist_wide_ctr, specieslist_wide_reg, by = "scientificName", suffix = c(".ctr", ".reg")) %>%
-  dplyr::select("scientificName", "Kick.reg" = "Rot (1 min).reg", "Malaise.reg" = "Malaise trap.reg", "Kick.ctr" = "Rot (1 min).ctr", "Malaise.ctr" = "Malaise trap.ctr") %>% arrange(scientificName)
+specieslist_by_status_x_method <- full_join(specieslist_wide_ctr, specieslist_wide_reg, by = "scientificName", suffix = c(".ctrl", ".reg")) %>%
+  dplyr::select("scientificName", "Kick.reg" = "Rot (1 min).reg", "Malaise.reg" = "Malaise trap.reg", "Kick.ctrl" = "Rot (1 min).ctrl", "Malaise.ctrl" = "Malaise trap.ctrl") %>% arrange(scientificName)
 
 rm(specieslist_long, specieslist_wide_ctr, specieslist_wide_reg)
 
@@ -305,13 +298,14 @@ unique(taxon_list_long$scientificName)
 taxon_list_wide_ctr <- spread(filter(taxon_list_long, Status == "Control"), samplingProtocol, n)
 taxon_list_wide_reg <- spread(filter(taxon_list_long, Status == "Regulated"), samplingProtocol, n)
 
-taxonlist_by_status_x_method <- full_join(taxon_list_wide_ctr, taxon_list_wide_reg, by = c("taxonRank","family","scientificName"), suffix = c(".ctr", ".reg")) %>% dplyr::select("taxonRank","scientificName", "Kick.reg" = "Rot (1 min).reg", "Malaise.reg" = "Malaise trap.reg", "Kick.ctr" = "Rot (1 min).ctr", "Malaise.ctr" = "Malaise trap.ctr") %>% arrange(family, scientificName)
+taxonlist_by_status_x_method <- full_join(taxon_list_wide_ctr, taxon_list_wide_reg, by = c("taxonRank","family","scientificName"), suffix = c(".ctrl", ".reg")) %>% dplyr::select("taxonRank","scientificName", "Kick.reg" = "Rot (1 min).reg", "Malaise.reg" = "Malaise trap.reg", "Kick.ctrl" = "Rot (1 min).ctrl", "Malaise.ctrl" = "Malaise trap.ctrl") %>% arrange(family, scientificName)
 
 rm(taxon_list_long, taxon_list_wide_ctr, taxon_list_wide_reg)
 
 ```
 
-## Quick stats for Malaise ----
+
+## Quick stats for adults (Malaise data)
 
 ```{r Quick stats for Malaise data}
 print("---- Stats across all Malaise ----")
@@ -334,17 +328,17 @@ paste("Number of species: ", length(unique(filter(malaise_occurrences_df, taxonR
 
 # ANALYSIS 1: ADULT TEMPORAL DISTRIBUTION ----------------
 
-Y = period an adult individual is detected, explained by year and status (random effects: locality and species).
-Data is at individual level.
+Y = period an adult individual is detected, explained by year and status (random effects: locality and species). Data is at individual level.
 
 ```{r Adult presence (only species in Malaise (no filtering, no absence))}
 
-tric_species_genus_malaise <- malaise_occurrences_df %>% transmute(year, periodNumber, Status, locality, scientificName, genus, taxonRank, n = individualCount)
-
 # One line per individual
-adult_individuals_trichoptera_df <- tric_species_genus_malaise[rep(row.names(tric_species_genus_malaise), times = tric_species_genus_malaise$n), ]
+adult_individuals_trichoptera_df <- malaise_occurrences_df[rep(row.names(malaise_occurrences_df), times = malaise_occurrences_df$individualCount), ]
 
+# Keep only most relevant columns
+adult_individuals_trichoptera_df <- adult_individuals_trichoptera_df %>% transmute(year, periodNumber, Status, locality, scientificName, genus, taxonRank)
 
+# Categorical emergence time
 adult_individuals_trichoptera_df$period <-  case_when(
   adult_individuals_trichoptera_df$periodNumber == 1 ~ "Period1",
   adult_individuals_trichoptera_df$periodNumber == 2 ~ "Period2",
@@ -360,11 +354,11 @@ adult_individuals_trichoptera_df$genus <- factor(adult_individuals_trichoptera_d
 
 ```
 
-``` {r Count table for adult Trichoptera (identified individuals only)}
+```{r Count table for adult Trichoptera (identified individuals only)}
 
-adultcount_table_long <- tric_species_genus_malaise %>% 
+adultcount_table_long <- malaise_occurrences_df %>% 
   group_by(year, Status, locality, periodNumber) %>%
-  summarise(sum_n = sum(n)) %>%
+  summarise(sum_n = sum(individualCount)) %>%
   ungroup() %>%
   complete(year, locality, periodNumber = c(1,2,3,4)) %>%
   transmute(year, Status, locality, periodNumber, sum_n) %>% # sets order of columns
@@ -423,7 +417,7 @@ confint(A1_favourite_model)
 
 ```
 
-``` {r A1: All model summaries}
+```{r A1: All model summaries}
 lapply(A1_candidate_models, summary)
 
 ```
@@ -479,9 +473,7 @@ A1_predictions <- A1_predictions %>% mutate(P_Y_eq_j = case_when(
 # This captures uncertainty in thresholds and fixed effects for the marginal predictions.
 
 # For ordinal CLMM, extract both thresholds (alpha) and fixed effects (beta)
-alpha <- A1_favourite_model$alpha
-beta  <- A1_favourite_model$beta
-coefs <- c(alpha, beta)
+coefs <- c(A1_favourite_model$alpha, A1_favourite_model$beta)
 
 vc    <- vcov(A1_favourite_model)
 
@@ -587,14 +579,12 @@ p_eq_A1
 p_leq_A1
 
 for (figformat in preferred_formats){
-  # NOTE! For some reason "less or equal to" sympbol is displayed as = in pdf (svg and png OK)
+  # NOTE! For some reason "less or equal to" symbol is displayed as = in pdf (svg and png OK)
   ggsave(paste("figures/results/adultobs_peq.", figformat, sep = ""), plot = p_eq_A1, height = 10, width = col_width_dbl, units = "cm")
   ggsave(paste("figures/results/adultobs_pleq.", figformat, sep = ""), , plot = p_leq_A1, height = 10, width = col_width_dbl, units = "cm")
 }
 
 ```
-
-
 
 # ANALYSIS 2: FIRST EMERGENCE ------------
 
@@ -709,7 +699,7 @@ summary(A2_favourite_model)
 confint(A2_favourite_model)
 ```
 
-``` {r A2: All model summaries}
+```{r A2: All model summaries}
 
 lapply(A2_candidate_models, summary)
 
@@ -768,10 +758,7 @@ A2_firstemg_predictions <- A2_firstemg_predictions %>% mutate(P_Y_eq_j = case_wh
 
 
 # For ordinal CLMM, extract both thresholds (alpha) and fixed effects (beta)
-# Diagnose dimensions first
-alpha <- A2_favourite_model$alpha
-beta  <- A2_favourite_model$beta
-coefs <- c(alpha, beta)
+coefs <- c(A2_favourite_model$alpha, A2_favourite_model$beta)
 
 vc    <- vcov(A2_favourite_model)
 
@@ -842,7 +829,6 @@ A2_firstemg_predictions <- A2_firstemg_predictions %>%
 
 ```
 
-
 ```{r A2: Visualize predictions with uncertainty}
 # Line-and-dot plot with ribbon and error bars for P(Y=j) and cumulative P(Y<=j).
 
@@ -879,7 +865,7 @@ p_eq_A2
 p_leq_A2
 
 for (figformat in preferred_formats){
-  # NOTE! For some reason "less or equal to" sympbol is displayed as = in pdf (svg and png OK)
+  # NOTE! For some reason "less or equal to" symbol is displayed as = in pdf (svg and png OK)
   ggsave(paste("figures/results/firstemg_peq.", figformat, sep = ""), plot = p_eq_A2, height = 10, width = col_width_dbl, units = "cm")
   ggsave(paste("figures/results/firstemg_pleq.", figformat, sep = ""), , plot = p_leq_A2, height = 10, width = col_width_dbl, units = "cm")
 }
@@ -887,8 +873,7 @@ for (figformat in preferred_formats){
   
 ```
 
-
-``` {r A2: Closer look at species difference between regulated and control}
+```{r A2: Closer look at species difference between regulated and control}
 
 # Subset for species that are observed in both regulated and control lakes
 species_both <- first_emergence_df %>% group_by(scientificName) %>% filter(n_distinct(Status) == 2) %>% pull(scientificName) %>% unique()
@@ -898,47 +883,23 @@ species_regonly <- first_emergence_df %>% group_by(scientificName) %>% filter(n_
 first_emergence_df_regonly <- first_emergence_df %>% filter(scientificName %in% species_regonly)
 
 
-species_contonly <- first_emergence_df %>% group_by(scientificName) %>% filter(n_distinct(Status) == 1, Status == "Control") %>% pull(scientificName) %>% unique()
-first_emergence_df_contonly <- first_emergence_df %>% filter(scientificName %in% species_contonly)
-
-# Subset within years
-# 2023
-species_both23 <- first_emergence_df %>% filter(year == 2023) %>% group_by(scientificName) %>% filter(n_distinct(Status) == 2) %>% pull(scientificName) %>% unique()
-first_emergence_df_bothonly23 <- first_emergence_df %>% filter(year == 2023) %>% filter(scientificName %in% species_both23)
-
-species_regonly23 <- first_emergence_df %>% filter(year == 2023) %>% group_by(scientificName) %>% filter(n_distinct(Status) == 1, Status == "Regulated") %>% pull(scientificName) %>% unique()
-first_emergence_df_regonly23 <- first_emergence_df %>% filter(year == 2023) %>% filter(scientificName %in% species_regonly23)
+species_ctrlonly <- first_emergence_df %>% group_by(scientificName) %>% filter(n_distinct(Status) == 1, Status == "Control") %>% pull(scientificName) %>% unique()
+first_emergence_df_ctrlonly <- first_emergence_df %>% filter(scientificName %in% species_ctrlonly)
 
 
-species_contonly23 <- first_emergence_df %>% filter(year == 2023) %>% group_by(scientificName) %>% filter(n_distinct(Status) == 1, Status == "Control") %>% pull(scientificName) %>% unique()
-first_emergence_df_contonly23 <- first_emergence_df %>% filter(year == 2023) %>% filter(scientificName %in% species_contonly23)
 
-
-# 2024
-species_both24 <- first_emergence_df %>% filter(year == 2024) %>% group_by(scientificName) %>% filter(n_distinct(Status) == 2) %>% pull(scientificName) %>% unique()
-first_emergence_df_bothonly24 <- first_emergence_df %>% filter(year == 2024) %>% filter(scientificName %in% species_both24)
-
-species_regonly24 <- first_emergence_df %>% filter(year == 2024) %>% group_by(scientificName) %>% filter(n_distinct(Status) == 1, Status == "Regulated") %>% pull(scientificName) %>% unique()
-first_emergence_df_regonly24 <- first_emergence_df %>% filter(year == 2024) %>% filter(scientificName %in% species_regonly24)
-
-
-species_contonly24 <- first_emergence_df %>% filter(year == 2024) %>% group_by(scientificName) %>% filter(n_distinct(Status) == 1, Status == "Control") %>% pull(scientificName) %>% unique()
-first_emergence_df_contonly24 <- first_emergence_df %>% filter(year == 2024) %>% filter(scientificName %in% species_contonly24)
-
-
-# Function
+# Function classifying each species by which lake types it was recorded in
 species_statusgroup <- function(speciesname){
   case_when(
     speciesname %in% species_both ~ "Both",
     speciesname %in% species_regonly ~ "Regulated",
-    speciesname %in% species_contonly ~ "Control",
+    speciesname %in% species_ctrlonly ~ "Control",
     .default = c("Unknown group")
     )
 }
 
 
 ```
-
 
 ```{r Plotting first emergence for each species}
 
@@ -955,7 +916,6 @@ p_all <- ggplot(first_emergence_df, aes(x = first_emerged, y=markdown_name, fill
   scale_fill_manual(values = status_colours) +
   scale_shape_manual(values = c(21,22)) +
   scale_size_area(breaks = c(1, 2, 3), max_size = 6, transform = "exp", name = "Number of lakes") +
-  # scale_radius(breaks = c(1, 2, 3), name = "Number of lakes") +
   guides(alpha = "none") +
   xlab("First emergence") +
   scale_y_discrete(limits=rev) +
@@ -973,10 +933,13 @@ for (figformat in preferred_formats){
 
 
 
-
 # ANALYSIS 3: ABUNDANCE AND SPECIES RICHNESS -------------
 
-``` {r Get all kicksample event IDs}
+The start of a phenological event, such as emergence, can be affected by the number of individuals, and since we are also looking across many species, the number of species as well. Because we only have data from the start of the flight period, we use larval data (kick samples) to calculate Trichoptera abundance and richness.
+
+This data is on sample level, and only includes individuals identified to species level.
+
+```{r Get all kicksample event IDs}
 # To get all the kicksamples that have been processed, regardless of whether Trichoptera are present or not, we load the data from the first sorting/identification round.
 
 # Import all occurrence files that are in the folder "occurrences"
@@ -1067,6 +1030,9 @@ kicksample_overview_df$sum_Species <- replace_na(kicksample_overview_df$sum_Spec
 
 ```
 
+
+## Quick stats for larvae (kick samples)
+
 ```{r Kick samples: Quick stats}
 print("---- Stats across all kick samples ----")
 
@@ -1086,6 +1052,8 @@ paste("Number of species: ", length(unique(filter(kicksample_trich_occurrences_s
 
 ```
 
+
+## Abundance
 
 ```{r Overview abundance}
 # Investigate dataset structure ---------------------------------------------
@@ -1131,8 +1099,7 @@ p_kickabun_box <- ggplot(data = kicksample_overview_df, aes(x = Status, y = sum_
   scale_color_manual(values = status_colours) +
   scale_fill_manual(values = 
                       c("Control" = alpha(status_colours[["Control"]], alpha = 0.5), 
-                        "Regulated" = alpha(status_colours[["Regulated"]], alpha = 0.5))
-                    ) +
+                        "Regulated" = alpha(status_colours[["Regulated"]], alpha = 0.5))) +
   theme_bw() + 
   theme(panel.grid = element_blank()) +
   guides(fill = "none", color = "none")
@@ -1146,39 +1113,38 @@ for (figformat in preferred_formats){
 
 ```
 
-
-``` {r Abundance: GLMMs (negative binomial)}
+```{r Abundance: GLMMs (negative binomial)}
 
 # Fit candidate models
 
 # Model 1 full 
-Kick_ab_nb_1 <- glmer.nb(formula = sum_individualCount ~ Status*year + (1|locality), 
+kicksample_ab_nb_1 <- glmer.nb(formula = sum_individualCount ~ Status*year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 # NB! Model 1 gives "not converging" warning
 
 # Model 2 no interaction
-Kick_ab_nb_2 <- glmer.nb(formula = sum_individualCount ~ Status + year + (1|locality), 
+kicksample_ab_nb_2 <- glmer.nb(formula = sum_individualCount ~ Status + year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 3 only Status
-Kick_ab_nb_3 <- glmer.nb(formula = sum_individualCount ~ Status + (1|locality), 
+kicksample_ab_nb_3 <- glmer.nb(formula = sum_individualCount ~ Status + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 4 only year
-Kick_ab_nb_4 <- glmer.nb(formula = sum_individualCount ~ year + (1|locality), 
+kicksample_ab_nb_4 <- glmer.nb(formula = sum_individualCount ~ year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 5 only intercept
-Kick_ab_nb_5 <- glmer.nb(formula = sum_individualCount ~ 1 + (1|locality), 
+kicksample_ab_nb_5 <- glmer.nb(formula = sum_individualCount ~ 1 + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # List all candidate models
-ab_candidate_models <- list(Kick_ab_nb_1,Kick_ab_nb_2,Kick_ab_nb_3,Kick_ab_nb_4,Kick_ab_nb_5)
+ab_candidate_models <- list(kicksample_ab_nb_1,kicksample_ab_nb_2,kicksample_ab_nb_3,kicksample_ab_nb_4,kicksample_ab_nb_5)
 MuMIn::model.sel(ab_candidate_models)
 
 lapply(ab_candidate_models, summary)
@@ -1191,10 +1157,13 @@ summary(ab_favourite_model)
 
 ```
 
-```{r Overview richness}
-# 2. Investigate dataset structure ---------------------------------------------
 
-## 2.1 Basic stats -------------------------------------------------------------
+## Richness
+
+```{r Overview richness}
+# Investigate dataset structure ---------------------------------------------
+
+## Basic stats -------------------------------------------------------------
 
 mean(kicksample_overview_df$sum_Species) # 2.45
 var(kicksample_overview_df$sum_Species) # 4.895763
@@ -1202,9 +1171,7 @@ sd(kicksample_overview_df$sum_Species) # 2.212637
 min(kicksample_overview_df$sum_Species) # 0
 max(kicksample_overview_df$sum_Species) # 8
 
-
 stderror(kicksample_overview_df$sum_Species) # 0.2856502
-
 
 mean(filter(kicksample_overview_df, Status == "Regulated")$sum_Species) # 1.733333
 mean(filter(kicksample_overview_df, Status == "Control")$sum_Species) # 3.166667
@@ -1226,7 +1193,6 @@ p_kickrich_dot <- ggplot(data = kicksample_overview_df, aes(x = Status, y = sum_
   guides(fill = "none")
 
 # Box plot
-
 p_kickrich_box <- ggplot(data = kicksample_overview_df, aes(x = Status, y = sum_Species, fill = Status, color = Status)) + 
   geom_boxplot() + 
   facet_wrap(~year) +
@@ -1236,8 +1202,7 @@ p_kickrich_box <- ggplot(data = kicksample_overview_df, aes(x = Status, y = sum_
   scale_color_manual(values = status_colours) +
   scale_fill_manual(values = 
                       c("Control" = alpha(status_colours[["Control"]], alpha = 0.5), 
-                        "Regulated" = alpha(status_colours[["Regulated"]], alpha = 0.5))
-                    ) +
+                        "Regulated" = alpha(status_colours[["Regulated"]], alpha = 0.5))) +
   theme_bw() + 
   theme(panel.grid = element_blank()) +
   guides(fill = "none", color = "none")
@@ -1252,76 +1217,76 @@ for (figformat in preferred_formats){
 
 ```
 
-
-``` {r Richness: GLMM (Negative binominal distribution)}
+```{r Richness: GLMM (Negative binominal distribution)}
 # Fit candidate models 
 
 # All models give warning:
 # in theta.ml(Y, mu, weights = object@resp$weights, limit = limit,  :iteration limit reached
 
 # Model 1 full 
-Kick_rich_nb_1 <- glmer.nb(formula = sum_Species ~ Status*year + (1|locality), 
+kicksample_rich_nb_1 <- glmer.nb(formula = sum_Species ~ Status*year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 2 no interaction
-Kick_rich_nb_2 <- glmer.nb(formula = sum_Species ~ Status + year + (1|locality), 
+kicksample_rich_nb_2 <- glmer.nb(formula = sum_Species ~ Status + year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 3 only Status
-Kick_rich_nb_3 <- glmer.nb(formula = sum_Species ~ Status + (1|locality), 
+kicksample_rich_nb_3 <- glmer.nb(formula = sum_Species ~ Status + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 4 only year
-Kick_rich_nb_4 <- glmer.nb(formula = sum_Species ~ year + (1|locality), 
+kicksample_rich_nb_4 <- glmer.nb(formula = sum_Species ~ year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # Model 5 only intercept
-Kick_rich_nb_5 <- glmer.nb(formula = sum_Species ~ 1 + (1|locality), 
+kicksample_rich_nb_5 <- glmer.nb(formula = sum_Species ~ 1 + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude)
 
 # List all candidate models
-rc_candidate_models <- list(Kick_rich_nb_1,Kick_rich_nb_2,Kick_rich_nb_3,Kick_rich_nb_4,Kick_rich_nb_5)
+rc_candidate_models <- list(kicksample_rich_nb_1,kicksample_rich_nb_2,kicksample_rich_nb_3,kicksample_rich_nb_4,kicksample_rich_nb_5)
 MuMIn::model.sel(rc_candidate_models)
 
 ```
 
-``` {r Richness: GLMM (Poisson distribution)}
+```{r Richness: GLMM (Poisson distribution)}
+
 # Fit candidate models 
 
 
 # Model 1 full 
-Kick_rich_po_1 <- glmer(formula = sum_Species ~ Status*year + (1|locality), 
+kicksample_rich_po_1 <- glmer(formula = sum_Species ~ Status*year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude, 
                      family = "poisson")
 
 # Model 2 no interaction
-Kick_rich_po_2 <- glmer(formula = sum_Species ~ Status + year + (1|locality), 
+kicksample_rich_po_2 <- glmer(formula = sum_Species ~ Status + year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude, family = "poisson")
 
 # Model 3 only Status
-Kick_rich_po_3 <- glmer(formula = sum_Species ~ Status + (1|locality), 
+kicksample_rich_po_3 <- glmer(formula = sum_Species ~ Status + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude, family = "poisson")
 
 # Model 4 only year
-Kick_rich_po_4 <- glmer(formula = sum_Species ~ year + (1|locality), 
+kicksample_rich_po_4 <- glmer(formula = sum_Species ~ year + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude, family = "poisson")
 
 # Model 5 only intercept
-Kick_rich_po_5 <- glmer(formula = sum_Species ~ 1 + (1|locality), 
+kicksample_rich_po_5 <- glmer(formula = sum_Species ~ 1 + (1|locality), 
                      data = kicksample_overview_df,
                      na.action = na.exclude, family = "poisson")
 
 # List all candidate models
-rc_candidate_models <- list(Kick_rich_po_1,Kick_rich_po_2,Kick_rich_po_3,Kick_rich_po_4,Kick_rich_po_5)
+rc_candidate_models <- list(kicksample_rich_po_1,kicksample_rich_po_2,kicksample_rich_po_3,kicksample_rich_po_4,kicksample_rich_po_5)
 MuMIn::model.sel(rc_candidate_models)
 
 lapply(rc_candidate_models, summary)
@@ -1329,23 +1294,18 @@ lapply(rc_candidate_models, summary)
 # Favourite model
 rc_favourite_model <- MuMIn::get.models(MuMIn::model.sel(rc_candidate_models), subset = 1)[[1]]
 rc_favourite_model
-coef(Kick_rich_po_1)
-summary(Kick_rich_po_1)
-
+coef(kicksample_rich_po_1)
+summary(kicksample_rich_po_1)
 
 ```
 
 
 
-
-
-
-
 # ADDITIONAL CHECKS ------------
 
-``` {r A1: Malaise count table (all Trich individuals)}
-#### Load files ------------
+```{r A1: Malaise count table (all Trich individuals)}
 
+# Load files
 malaise_sorting_df <- list.files(path = "data/source_data/raw/malaise_data_occurences/", # go to folder
                          pattern = "*.xlsx", # look for Excel-files
                          full.names = TRUE) %>% # include path in filename
@@ -1360,11 +1320,9 @@ malaise_sorting_df <- malaise_sorting_df %>%
 # Change "round" to "sample" 
 malaise_sorting_df$internal_eventID <- str_replace_all(malaise_sorting_df$internal_eventID, "round","sample")
 
-
 # Add locality/event info to occurrence file
 malaise_sorting_df <- merge(x = malaise_sorting_df, y = events_df,
                     by = c("internal_eventID"), all.x = TRUE) 
-
 
 # Update to correct protocol
 malaise_sorting_df$samplingProtocol <- "Malaise trap"
@@ -1374,13 +1332,10 @@ malaise_sorting_df$samplingEffort <- "Single Malaise trap, operated for approxim
 malaise_sorting_df <- merge(x = malaise_sorting_df, y = taxonlist_df,
                     by = "scientificName", all.x = TRUE)
 
-
-
 # Change ø to o
 malaise_sorting_df <- malaise_sorting_df %>%
   mutate(locality = iconv(locality,"UTF-8", "ASCII//TRANSLIT", sub = "o"),
          internal_eventID = iconv(internal_eventID,"UTF-8", "ASCII//TRANSLIT", sub = "o"))
-
 
 # Create regulation status column
 malaise_sorting_df <- malaise_sorting_df %>%
@@ -1391,8 +1346,6 @@ malaise_sorting_df <- malaise_sorting_df %>%
 malaise_sorting_df$locality <- factor(malaise_sorting_df$locality, 
                                               levels = lake_names)
 
-
-
 # Make year a factor and set level order
 malaise_sorting_df$year <- factor(malaise_sorting_df$year, levels = c(2023, 2024))
 
@@ -1400,7 +1353,8 @@ malaise_sorting_df$year <- factor(malaise_sorting_df$year, levels = c(2023, 2024
 malaise_sorting_T_df <- malaise_sorting_df %>% filter(scientificName == "Trichoptera")
 
 
-# Table ----------
+
+# Table 
 A1_adultcount2_table_long <- malaise_sorting_T_df %>% 
   group_by(year, Status, locality, periodNumber) %>%
   summarise(sum_n = sum(individualCount)) %>%
@@ -1416,9 +1370,7 @@ A1_adultcount2_table_wide <- A1_adultcount2_table_long %>%
 
 A1_adultcount2_table_wide
 
-
 ```
-
 
 ```{r Malaise: Compare N ID'd to N all}
 print("---- Stats across all Malaise ----")
@@ -1433,9 +1385,7 @@ print("---- Stats for ctrl Malaise ----")
 paste("Number of individuals (ID): ", sum(filter(malaise_occurrences_df, Status == "Control")$individualCount)) %>% print()
 paste("Number of individuals (all): ", sum(filter(malaise_sorting_T_df, Status == "Control")$individualCount)) %>% print()
 
-
 ```
-
 
 ```{r Kick samples: Compare N ID'd to N all}
 print("---- Stats across all kick samples ----")
@@ -1453,6 +1403,5 @@ print("---- Stats for ctrl kick samples ----")
 paste("Number of individuals (ID): ", sum(filter(kicksample_trich_occurrences_speciesonly_df, taxonRank == "SPECIES", Status == "Control")$individualCount)) %>% print()
 paste("Number of individuals (ID): ", sum(filter(kicksample_overview_df, Status == "Control")$sum_individualCount)) %>% print()
 paste("Number of individuals (all): ", sum(filter(kicksample_sorting_df, order == "Trichoptera", Status == "Control")$individualCount)) %>% print()
-
 
 ```
