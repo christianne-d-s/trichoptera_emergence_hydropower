@@ -12,6 +12,8 @@ The file `temperature.Rmd` looks at the water temperature data from the temperat
 
 To keep figures consistent, a separate script `figure_formats_and_colour_palette.R` is called at the start of the other scripts. 
 
+`SESSION_INFO.txt` contains a log of which versions of R and packages that were used.
+
 *\*Note: Kilvatnet is the name of a part of Jonsvatnet. These two names are used interchangeably in this R project to refer to the same sampling location.*
 
 ## License
